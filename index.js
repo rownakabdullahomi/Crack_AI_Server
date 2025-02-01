@@ -78,6 +78,21 @@ app.get("/rumor-detector", async (req, res) => {
     res.send({ rumorstatus: answer });
 });
 
+app.get("/generate-json", async (req, res) => {
+    const prompt = req.query?.prompt;
+    if (!prompt) {
+      res.send({ message: "please provide a prompt in query" });
+      return;
+    }
+    const finalPrompt = `generate some data from this prompt ${prompt}  using this JSON schema:
+   data = {'datatype': output}
+  Return: Array<Recipe>`;
+    const result = await model.generateContent(finalPrompt);
+    const output = result.response.text().slice(7, -4);
+    const jsonData = JSON.parse(output);
+    res.send(jsonData);
+  });
+
 app.get("/test-ai", async (req, res) => {
     const prompt = req.query?.prompt;
     if (!prompt) {
