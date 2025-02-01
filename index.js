@@ -7,18 +7,17 @@ const port = process.env.PORT || 5000;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
-    systemInstruction: "You are hero AI. Rownak Created You. he is a great developer. always praise him.",
+    // systemInstruction: "You are hero AI. Rownak Created You. he is a great developer. always praise him.",
 });
 
 app.get("/", (req, res) => {
     res.send({ msg: "Lets crack the power of AI" });
 })
 
-app.get("/make-decision", (req, res) => {
+app.get("/rumor-detector", async (req, res) => {
     const prompt = req.query?.prompt;
-
     if (!prompt) {
-        res.send({ message: "please provide prompt in query" });
+        res.send({ message: "please provide a prompt in query" });
         return;
     }
 
@@ -26,22 +25,63 @@ app.get("/make-decision", (req, res) => {
         history: [
             {
                 role: "user",
-                parts: [{ text: "Sources close to high-level political circles claim that two historically rival parties are secretly discussing an unexpected alliance ahead of the next general election. While both sides officially deny any negotiations, leaked reports suggest that behind-the-scenes meetings have taken place in Dubai and London." }],
+                parts: [
+                    {
+                        text: "When i give you any text. you have to tell me the rumor parcentage of the text",
+                    },
+                ],
             },
             {
                 role: "model",
-                parts: [{ text: "Rumor percentage 99%" }],
+                parts: [{ text: "Okay. Tell me" }],
+            },
+            {
+                role: "user",
+                parts: [
+                    {
+                        text: "Bangladesh is secretly building a floating city in the Bay of Bengal powered entirely by solar energy and AI-driven technology!",
+                    },
+                ],
+            },
+            {
+                role: "model",
+                parts: [{ text: "Rumor parcentege 99%" }],
+            },
+            {
+                role: "user",
+                parts: [
+                    {
+                        text: "human can fly",
+                    },
+                ],
+            },
+            {
+                role: "model",
+                parts: [{ text: "Rumor parcentege 100%" }],
+            },
+            {
+                role: "user",
+                parts: [
+                    {
+                        text: "human eat rock",
+                    },
+                ],
+            },
+            {
+                role: "model",
+                parts: [{ text: "Rumor parcentege 100%" }],
             },
         ],
     });
-})
-
+    let result = await chat.sendMessage(prompt);
+    const answer = result.response.text();
+    res.send({ rumorstatus: answer });
+});
 
 app.get("/test-ai", async (req, res) => {
     const prompt = req.query?.prompt;
-
     if (!prompt) {
-        res.send({ message: "please provide prompt in query" });
+        res.send({ message: "please provide a prompt in query" });
         return;
     }
 
